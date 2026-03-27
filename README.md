@@ -29,7 +29,7 @@ project/
 │ └── App.jsx
 └── .env.example
 
-The idea is to keep things modular and easy to scale.
+The idea is to keep things modular and easy to scale..
 
 ⚡ Getting Started
 Prerequisites
