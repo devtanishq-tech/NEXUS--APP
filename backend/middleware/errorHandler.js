@@ -21,13 +21,13 @@ const handleDuplicateKeyError = (err) => {
   const field = Object.keys(err.keyValue)[0];
   return new AppError(
     `An account with this ${field} already exists. Please use a different ${field}.`,
-    409
+    409,
   );
 };
 
 const handleValidationError = (err) => {
   const messages = Object.values(err.errors).map((e) => e.message);
-  return new AppError(messages.join('. '), 422);
+  return new AppError(messages.join(". "), 422);
 };
 
 // ── Development error response (verbose) ───────────────────────────────────
@@ -50,50 +50,53 @@ const sendProdError = (err, res) => {
   }
 
   // Unknown/programming errors: don't leak details
-  console.error('💥 UNHANDLED ERROR:', err);
+  console.error("💥 UNHANDLED ERROR:", err);
   res.status(500).json({
     success: false,
-    message: 'Something went wrong. Please try again later.',
+    message: "Something went wrong. Please try again later.",
   });
 };
 
 // ── Main error handler ──────────────────────────────────────────────────────
 const globalErrorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
-  err.status = err.status || 'error';
+  err.status = err.status || "error";
 
   let error = { ...err, message: err.message, name: err.name };
 
   // Normalize known Mongoose/MongoDB errors
-  if (err.name === 'CastError') error = handleCastError(err);
+  if (err.name === "CastError") error = handleCastError(err);
   if (err.code === 11000) error = handleDuplicateKeyError(err);
-  if (err.name === 'ValidationError') error = handleValidationError(err);
+  if (err.name === "ValidationError") error = handleValidationError(err);
 
   const isApiRequest =
-    req.path.startsWith('/api/') || req.headers.accept?.includes('application/json');
+    req.path.startsWith("/api/") ||
+    req.headers.accept?.includes("application/json");
 
   if (isApiRequest) {
-    if (process.env.NODE_ENV === 'development') return sendDevError(error, res);
+    if (process.env.NODE_ENV === "development") return sendDevError(error, res);
     return sendProdError(error, res);
   }
 
   // EJS route errors → redirect with flash
-  req.flash('error', error.message || 'An unexpected error occurred.');
-  res.redirect('back');
+  if (req.flash) {
+    req.flash("error", error.message || "An unexpected error occurred.");
+  }
+  res.redirect("/login");
 };
 
 // ── 404 handler for unknown routes ─────────────────────────────────────────
 const notFoundHandler = (req, res, next) => {
-  const isApiRequest = req.path.startsWith('/api/');
+  const isApiRequest = req.path.startsWith("/api/");
   if (isApiRequest) {
     return res.status(404).json({
       success: false,
       message: `Route ${req.method} ${req.originalUrl} not found.`,
     });
   }
-  res.status(404).render('error', {
-    title: '404 Not Found',
-    message: 'The page you are looking for does not exist.',
+  res.status(404).render("error", {
+    title: "404 Not Found",
+    message: "The page you are looking for does not exist.",
     statusCode: 404,
   });
 };
