@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — NexusApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080c14;
+      --surface: #0f1623;
+      --surface-2: #161e2e;
+      --surface-3: #1c2540;
+      --border: rgba(99, 160, 255, 0.1);
+      --border-2: rgba(99, 160, 255, 0.06);
+      --accent: #4f8ef7;
+      --accent-dim: rgba(79, 142, 247, 0.12);
+      --text: #e8edf5;
+      --text-muted: #6b7a99;
+      --text-dim: #3d4d6a;
+      --success: #10d078;
+      --warning: #f5a524;
+      --danger: #f04a5a;
+      --purple: #9c7dff;
+      --sidebar-w: 240px;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+    }
+
+    /* ── Sidebar ────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--accent), #7c5fe6);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-icon svg { width: 16px; height: 16px; }
+
+    .logo-name {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px; font-weight: 800;
+      letter-spacing: -0.3px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      overflow-y: auto;
+    }
+
+    .nav-section-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 8px;
+      margin: 16px 0 6px;
+    }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover { background: var(--surface-2); color: var(--text); }
+
+    .nav-item.active {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 12px;
+      border-top: 1px solid var(--border-2);
+    }
+
+    .user-card {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--surface-2);
+    }
+
+    .avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 700;
+      color: white; flex-shrink: 0;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name {
+      font-size: 13px; font-weight: 500;
+      color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .user-email {
+      font-size: 11px; color: var(--text-dim);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .logout-btn {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 16px;
+      transition: color 0.15s;
+    }
+    .logout-btn:hover { color: var(--danger); }
+
+    /* ── Main Content ────────────────────────── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Topbar ──────────────────────────────── */
+    .topbar {
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-left h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px; font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .topbar-left p {
+      font-size: 13px; color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--accent); color: white;
+    }
+    .btn-primary:hover { background: #6da8ff; transform: translateY(-1px); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+
+    .btn-danger {
+      background: rgba(240, 74, 90, 0.12);
+      color: var(--danger);
+      border: 1px solid rgba(240, 74, 90, 0.2);
+    }
+    .btn-danger:hover { background: rgba(240, 74, 90, 0.2); }
+
+    /* ── Page Content ───────────────────────── */
+    .content { padding: 32px; flex: 1; }
+
+    /* ── Stats Grid ──────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .stat-card:nth-child(2) { animation-delay: 0.05s; }
+    .stat-card:nth-child(3) { animation-delay: 0.1s; }
+    .stat-card:nth-child(4) { animation-delay: 0.15s; }
+    .stat-card:nth-child(5) { animation-delay: 0.2s; }
+    .stat-card:nth-child(6) { animation-delay: 0.25s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 60px; height: 60px;
+      border-radius: 0 12px 0 60px;
+      opacity: 0.06;
+    }
+
+    .stat-card[data-color="blue"]::after { background: var(--accent); }
+    .stat-card[data-color="green"]::after { background: var(--success); }
+    .stat-card[data-color="purple"]::after { background: var(--purple); }
+
+    .stat-label { font-size: 11px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .stat-sub { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+
+    .stat-card[data-color="blue"] .stat-value { color: var(--accent); }
+    .stat-card[data-color="green"] .stat-value { color: var(--success); }
+    .stat-card[data-color="purple"] .stat-value { color: var(--purple); }
+    .stat-card[data-color="warning"] .stat-value { color: var(--warning); }
+
+    /* ── Tabs ─────────────────────────────────── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 8px 20px;
+      border-radius: 7px;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--surface-2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+
+    /* ── Table ─────────────────────────────────── */
+    .table-wrapper {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+
+    thead th {
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.8px; text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border-2);
+      transition: background 0.12s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-2); }
+
+    tbody td {
+      padding: 14px 20px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    .td-title { font-weight: 500; color: var(--text); }
+    .td-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    /* Badges */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11.5px; font-weight: 500;
+    }
+
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+    .badge-active { background: rgba(16, 208, 120, 0.12); color: var(--success); }
+    .badge-active .badge-dot { background: var(--success); }
+
+    .badge-pending { background: rgba(245, 165, 36, 0.12); color: var(--warning); }
+    .badge-pending .badge-dot { background: var(--warning); }
+
+    .badge-completed { background: rgba(79, 142, 247, 0.12); color: var(--accent); }
+    .badge-completed .badge-dot { background: var(--accent); }
+
+    .badge-inactive { background: rgba(107, 122, 153, 0.12); color: var(--text-muted); }
+    .badge-inactive .badge-dot { background: var(--text-dim); }
+
+    .priority-chip {
+      display: inline-block;
+      padding: 2px 8px; border-radius: 4px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase;
+    }
+
+    .priority-high { background: rgba(240, 74, 90, 0.1); color: var(--danger); }
+    .priority-medium { background: rgba(245, 165, 36, 0.1); color: var(--warning); }
+    .priority-low { background: rgba(107, 122, 153, 0.1); color: var(--text-muted); }
+
+    .action-btns { display: flex; gap: 6px; }
+
+    .icon-btn {
+      width: 30px; height: 30px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .icon-btn:hover { background: var(--surface-3); color: var(--text); }
+    .icon-btn.delete:hover { background: rgba(240, 74, 90, 0.1); color: var(--danger); border-color: rgba(240, 74, 90, 0.2); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Modal ───────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 90%;
+      max-width: 480px;
+      transform: translateY(20px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal { transform: translateY(0); }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 500;
+      letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 7px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .form-select option { background: var(--surface-2); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+    .empty-title { font-size: 15px; font-weight: 500; color: var(--text-muted); }
+
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 14px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      z-index: 9999;
+      display: flex; align-items: center; gap: 10px;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.25s;
+      max-width: 320px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { border-color: rgba(16, 208, 120, 0.3); }
+    .toast-error { border-color: rgba(240, 74, 90, 0.3); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Sidebar ────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+      </div>
+      <span class="logo-name">Nexus</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Workspace</span>
+      <a class="nav-item active" href="/dashboard">
+        <span class="nav-icon">⊞</span> Dashboard
+      </a>
+      <a class="nav-item" href="#tasks-tab" onclick="switchTab('tasks')">
+        <span class="nav-icon">✓</span> Tasks
+      </a>
+      <a class="nav-item" href="#leads-tab" onclick="switchTab('leads')">
+        <span class="nav-icon">◎</span> Leads
+      </a>
+      <a class="nav-item" href="#users-tab" onclick="switchTab('users')">
+        <span class="nav-icon">⊙</span> Team
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar"><%= user.name.charAt(0).toUpperCase() %></div>
+        <div class="user-info">
+          <div class="user-name"><%= user.name %></div>
+          <div class="user-email"><%= user.email %></div>
+        </div>
+        <a href="/logout" class="logout-btn" title="Sign out">⏻</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────────────── -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Good day, <%= user.name.split(' ')[0] %> 👋</h1>
+        <p>Here's what's happening in your workspace.</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="openModal()">+ New Item</button>
+        <a href="/logout" class="btn btn-ghost">Sign Out</a>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <div class="stat-card" data-color="blue">
+          <div class="stat-label">Total Tasks</div>
+          <div class="stat-value"><%= stats.totalTasks %></div>
+          <div class="stat-sub"><%= stats.completedTasks %> completed</div>
+        </div>
+        <div class="stat-card" data-color="green">
+          <div class="stat-label">Active Leads</div>
+          <div class="stat-value"><%= stats.activeLeads %></div>
+          <div class="stat-sub">of <%= stats.totalLeads %> total</div>
+        </div>
+        <div class="stat-card" data-color="purple">
+          <div class="stat-label">Team Members</div>
+          <div class="stat-value"><%= stats.activeUsers %></div>
+          <div class="stat-sub"><%= stats.totalUsers %> total</div>
+        </div>
+        <div class="stat-card" data-color="warning">
+          <div class="stat-label">Pending Tasks</div>
+          <div class="stat-value"><%= tasks.filter(t => t.status === 'pending').length %></div>
+          <div class="stat-sub">need attention</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="section-header">
+        <h2 class="section-title">Data Management</h2>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" id="tab-tasks" onclick="switchTab('tasks')">✓ Tasks (<%= tasks.length %>)</button>
+        <button class="tab" id="tab-leads" onclick="switchTab('leads')">◎ Leads (<%= leads.length %>)</button>
+        <button class="tab" id="tab-users" onclick="switchTab('users')">⊙ Team (<%= teamUsers.length %>)</button>
+      </div>
+
+      <!-- Tasks Panel -->
+      <div class="tab-panel active" id="panel-tasks">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Task</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tasks-body">
+              <% if (tasks.length === 0) { %>
+                <tr><td colspan="4">
+                  <div class="empty-state">
+                    <div class="empty-icon">✓</div>
+                    <div class="empty-title">No tasks yet. Create one!</div>
+                  </div>
+                </td></tr>
+              <% } %>
+              <% tasks.forEach(task => { %>
+                <tr data-id="<%= task._id %>" data-category="task">
+                  <td>
+                    <div class="td-title"><%= task.title %></div>
+                    <% if (task.description) { %><div class="td-desc"><%= task.description %></div><% } %>
+                  </td>
+                  <td>
+                    <span class="badge badge-<%= task.status %>">
+                      <span class="badge-dot"></span><%= task.status %>
+                    </span>
+                  </td>
+                  <td><span class="priority-chip priority-<%= task.priority %>"><%= task.priority %></span></td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="icon-btn" title="Edit" onclick="editItem('<%= task._id %>', '<%= task.title.replace(/'/g, "\\'") %>', '<%= (task.description||'').replace(/'/g, "\\'") %>', 'task', '<%= task.status %>', '<%= task.priority %>')">✎</button>
+                      <button class="icon-btn delete" title="Delete" onclick="deleteItem('<%= task._id %>')">✕</button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Leads Panel -->
+      <div class="tab-panel" id="panel-leads">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Lead</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (leads.length === 0) { %>
+                <tr><td colspan="4">
+                  <div class="empty-state">
+                    <div class="empty-icon">◎</div>
+                    <div class="empty-title">No leads yet. Add one!</div>
+                  </div>
+                </td></tr>
+              <% } %>
+              <% leads.forEach(lead => { %>
+                <tr data-id="<%= lead._id %>" data-category="lead">
+                  <td>
+                    <div class="td-title"><%= lead.title %></div>
+                    <% if (lead.description) { %><div class="td-desc"><%= lead.description %></div><% } %>
+                  </td>
+                  <td>
+                    <span class="badge badge-<%= lead.status %>">
+                      <span class="badge-dot"></span><%= lead.status %>
+                    </span>
+                  </td>
+                  <td><span class="priority-chip priority-<%= lead.priority %>"><%= lead.priority %></span></td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="icon-btn" title="Edit" onclick="editItem('<%= lead._id %>', '<%= lead.title.replace(/'/g, "\\'") %>', '<%= (lead.description||'').replace(/'/g, "\\'") %>', 'lead', '<%= lead.status %>', '<%= lead.priority %>')">✎</button>
+                      <button class="icon-btn delete" title="Delete" onclick="deleteItem('<%= lead._id %>')">✕</button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Team Panel -->
+      <div class="tab-panel" id="panel-users">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (teamUsers.length === 0) { %>
+                <tr><td colspan="4">
+                  <div class="empty-state">
+                    <div class="empty-icon">⊙</div>
+                    <div class="empty-title">No team members yet.</div>
+                  </div>
+                </td></tr>
+              <% } %>
+              <% teamUsers.forEach(member => { %>
+                <tr data-id="<%= member._id %>" data-category="user">
+                  <td>
+                    <div class="td-title"><%= member.title %></div>
+                    <% if (member.description) { %><div class="td-desc"><%= member.description %></div><% } %>
+                  </td>
+                  <td>
+                    <span class="badge badge-<%= member.status %>">
+                      <span class="badge-dot"></span><%= member.status %>
+                    </span>
+                  </td>
+                  <td><span class="priority-chip priority-<%= member.priority %>"><%= member.priority %></span></td>
+                  <td>
+                    <div class="action-btns">
+                      <button class="icon-btn" title="Edit" onclick="editItem('<%= member._id %>', '<%= member.title.replace(/'/g, "\\'") %>', '<%= (member.description||'').replace(/'/g, "\\'") %>', 'user', '<%= member.status %>', '<%= member.priority %>')">✎</button>
+                      <button class="icon-btn delete" title="Delete" onclick="deleteItem('<%= member._id %>')">✕</button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ── Create/Edit Modal ──────────────────── -->
+  <div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+    <div class="modal">
+      <h2 class="modal-title" id="modal-title">New Item</h2>
+
+      <input type="hidden" id="edit-id" value="" />
+
+      <div class="form-group">
+        <label class="form-label">Title *</label>
+        <input type="text" class="form-input" id="field-title" placeholder="Enter title..." />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="field-desc" placeholder="Optional description..."></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select class="form-select" id="field-category">
+            <option value="task">Task</option>
+            <option value="lead">Lead</option>
+            <option value="user">Team Member</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="form-select" id="field-priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="field-status">
+          <option value="active">Active</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitForm()">Save Item</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API = '/api';
+    let editingId = null;
+    let currentTab = 'tasks';
+
+    // ── Tab switching ───────────────────────────────────
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+      document.getElementById('panel-' + tab).classList.add('active');
+    }
+
+    // ── Modal ────────────────────────────────────────────
+    function openModal() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = 'New Item';
+      document.getElementById('field-title').value = '';
+      document.getElementById('field-desc').value = '';
+      document.getElementById('field-category').value = currentTab === 'users' ? 'user' : currentTab.slice(0,-1);
+      document.getElementById('field-priority').value = 'medium';
+      document.getElementById('field-status').value = 'active';
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function editItem(id, title, desc, category, status, priority) {
+      editingId = id;
+      document.getElementById('modal-title').textContent = 'Edit Item';
+      document.getElementById('field-title').value = title;
+      document.getElementById('field-desc').value = desc;
+      document.getElementById('field-category').value = category;
+      document.getElementById('field-status').value = status;
+      document.getElementById('field-priority').value = priority;
+      document.getElementById('modal-overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    }
+
+    // ── CRUD ────────────────────────────────────────────
+    async function submitForm() {
+      const title = document.getElementById('field-title').value.trim();
+      if (!title) { showToast('Title is required.', 'error'); return; }
+
+      const payload = {
+        title,
+        description: document.getElementById('field-desc').value.trim(),
+        category: document.getElementById('field-category').value,
+        status: document.getElementById('field-status').value,
+        priority: document.getElementById('field-priority').value,
+      };
+
+      try {
+        const url = editingId ? `${API}/data/${editingId}` : `${API}/data`;
+        const method = editingId ? 'PUT' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        showToast(editingId ? 'Item updated!' : 'Item created!', 'success');
+        closeModal();
+        setTimeout(() => location.reload(), 600);
+      } catch (err) {
+        showToast(err.message || 'Something went wrong.', 'error');
+      }
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Are you sure you want to delete this item?')) return;
+
+      try {
+        const res = await fetch(`${API}/data/${id}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message);
+
+        showToast('Item deleted.', 'success');
+        setTimeout(() => location.reload(), 600);
+      } catch (err) {
+        showToast(err.message || 'Delete failed.', 'error');
+      }
+    }
+
+    // ── Toast ────────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = (type === 'success' ? '✓  ' : '⚠  ') + msg;
+      toast.className = `toast toast-${type} show`;
+      setTimeout(() => { toast.classList.remove('show'); }, 3000);
+    }
+  </script>
+</body>
+</html>

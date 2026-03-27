@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= statusCode || 500 %> — NexusApp</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #080c14; --accent: #4f8ef7; --text: #e8edf5; --text-muted: #6b7a99; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg); color: var(--text);
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      text-align: center;
+    }
+    .code {
+      font-family: 'Syne', sans-serif; font-size: 120px; font-weight: 800;
+      letter-spacing: -4px; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), #7c5fe6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+    }
+    h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+    p { color: var(--text-muted); font-size: 15px; margin-bottom: 32px; max-width: 400px; }
+    a {
+      display: inline-block; padding: 12px 28px;
+      background: var(--accent); color: white;
+      border-radius: 8px; text-decoration: none;
+      font-weight: 500; font-size: 14px;
+      transition: background 0.2s;
+    }
+    a:hover { background: #6da8ff; }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="code"><%= statusCode || 500 %></div>
+    <h1><%= title || 'Something went wrong' %></h1>
+    <p><%= message || 'An unexpected error occurred. Please try again.' %></p>
+    <a href="/">← Back to Home</a>
+  </div>
+</body>
+</html>
